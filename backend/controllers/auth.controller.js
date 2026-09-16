@@ -33,12 +33,16 @@ export const signUp = async (req, res) => {
       password: hashedPassword,
     });
     const token = genToken(user._id);
+
+    const isProduction = process.env.NODE_ENV === "production";
     res.cookie("token", token, {
       httpOnly: true,
-      secure: true,
-      sameSite: true,
+      secure: isProduction,
+      sameSite: isProduction ? "strict" : "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: "/",
     });
+
     return res.status(201).json({
       message: "User created successfully",
       user: {
@@ -83,14 +87,24 @@ export const login = async (req, res) => {
     }
 
     const token = genToken(user._id);
+    const isProduction = process.env.NODE_ENV === "production";
     res.cookie("token", token, {
       httpOnly: true,
-      secure: true,
-      sameSite: true,
+      secure: isProduction,
+      sameSite: isProduction ? "strict" : "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: "/",
     });
     return res.status(200).json({
       message: "Login successful",
+      user: {
+        _id: user._id,
+        id: user._id,
+        name: user.name,
+        userName: user.userName,
+        email: user.email,
+        image: user.image,
+      },
     });
   } catch (error) {
     return res.status(500).json({
@@ -101,7 +115,13 @@ export const login = async (req, res) => {
 
 export const logout = async (req, res) => {
   try {
-    res.clearCookie("token");
+    const isProduction = process.env.NODE_ENV === "production";
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? "strict" : "lax",
+      path: "/",
+    });
     return res.status(200).json({ message: "logged out successfully" });
   } catch (error) {
     return res.status(500).json({

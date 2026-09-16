@@ -1,0 +1,44 @@
+services:
+
+  mongodb:
+    image: mongo:latest
+    container_name: nexChat-mongoDb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: nex-chat-backend
+    container_name: nexchat-backend-container
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./backend/.env
+    environment:
+      MONGO_URI: mongodb://mongodb:27017/nexchat
+    depends_on:
+      - mongodb
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL}
+        VITE_SOCKET_URL: ${VITE_SOCKET_URL}
+
+    image: frontend
+    container_name: nexchat-frontend-container
+    ports:
+      - "5173:80"
+    env_file:
+      - ./frontend/.env
+    depends_on:
+      - backend
+
+volumes:
+  mongodb_data:
