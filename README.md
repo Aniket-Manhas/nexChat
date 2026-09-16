@@ -50,7 +50,7 @@ NexChat/
 ### 1. Clone and install
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/Aniket-Manhas/nexChat.git
 cd NexChat
 
 # Install backend dependencies
